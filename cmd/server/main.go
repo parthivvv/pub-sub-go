@@ -125,10 +125,13 @@ func (s *Server) websocketHandler(w http.ResponseWriter, r *http.Request) {
 // CORS middleware
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers for all requests
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-API-Key, Authorization")
+		w.Header().Set("Access-Control-Max-Age", "86400")
 
+		// Handle preflight OPTIONS requests
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
@@ -157,10 +160,16 @@ func main() {
 	r.Use(corsMiddleware)
 	r.Use(loggingMiddleware)
 
+	// Add a catch-all OPTIONS handler first
+	r.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// CORS headers are already set by middleware
+		w.WriteHeader(http.StatusOK)
+	})
+
 	// REST API routes
 	r.HandleFunc("/topics", server.createTopicHandler).Methods("POST")
-	r.HandleFunc("/topics/{name}", server.deleteTopicHandler).Methods("DELETE")
 	r.HandleFunc("/topics", server.listTopicsHandler).Methods("GET")
+	r.HandleFunc("/topics/{name}", server.deleteTopicHandler).Methods("DELETE")
 	r.HandleFunc("/health", server.healthHandler).Methods("GET")
 	r.HandleFunc("/stats", server.statsHandler).Methods("GET")
 

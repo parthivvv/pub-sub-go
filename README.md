@@ -25,7 +25,7 @@ A high-performance, thread-safe, in-memory publish-subscribe messaging system bu
 
 #### Ring Buffer for Message History
 - **Implementation**: Uses a slice with manual ring buffer behavior
-- **Rationale**: Provides O(1) message storage with bounded memory usage
+- **Rationale**: Provides O(N) message storage with bounded memory usage (For simplicity)
 - **Behavior**: When capacity (100 messages) is reached, oldest messages are overwritten
 - **Benefits**: Constant memory footprint, efficient historical message replay
 
@@ -330,15 +330,4 @@ curl -X DELETE http://localhost:8080/topics/test
 1. **No Persistence**: All data lost on restart (by design)
 2. **Single Instance**: No built-in clustering or replication
 3. **Memory Bounded**: Fixed limits may cause message/subscriber loss
-4. **No Authentication**: Basic system without security (can be added via middleware)
-5. **Simple Backpressure**: Aggressive disconnection policy for slow consumers
-
-## Future Enhancements
-
-- Message persistence with configurable retention
-- Clustered deployment with message replication  
-- Advanced backpressure strategies (circuit breakers, rate limiting)
-- Authentication and authorization mechanisms
-- Metrics export (Prometheus integration)
-- Message compression and batching
-- Topic partitioning for horizontal scaling
+4**Simple Backpressure**: Aggressive disconnection policy for slow consumers
